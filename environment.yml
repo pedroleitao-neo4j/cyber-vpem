@@ -1,0 +1,20 @@
+name: nvd
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - jupyter
+  - jupyterlab
+  - notebook
+  - ipykernel
+  - numpy
+  - networkx
+  - python-dotenv
+  - pandas
+  - tqdm
+  - matplotlib
+  - seaborn
+  - pip
+  - pip:
+    - neo4j
