@@ -6,6 +6,14 @@ This notebook demonstrates how to create a **Vulnerability Prioritization and Ex
 
 This is a classic use case for cybersecurity teams looking to evolve from reactive "patching everything" to a proactive, risk-based vulnerability management strategy.
 
+This example includes two main notebooks:
+
+1. **[Data Ingestion](loader.ipynb):** Loading synthetic data representing organizational assets, vulnerabilities from NVD, and threat intelligence from CISA KEV into Neo4j.
+2. **[Specific Use Cases](vpem.ipynb):** Demonstrating key VPEM queries, including:
+   - **Reachability Analysis:** Identifying which vulnerabilities are exposed to the internet.
+   - **Impact Analysis:** Determining what critical assets are at risk if a vulnerability is exploited.
+   - **Contextual Risk Scoring:** Calculating a dynamic risk score that combines technical severity with business context.
+
 ### Data Sources
 
 In our example, we integrate three distinct layers of data to build a holistic risk view:
