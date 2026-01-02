@@ -1,8 +1,8 @@
-# A Vulnerability Prioritization and Exposure Management (VPEM) Graph Use Case
+# A Cybersecurity Vulnerability Prioritization and Exposure Management (VPEM) Graph Use Case
 
 ![A Vulnerability Prioritization and Exposure Management (VPEM) Graph Use Case](headline.png)
 
-This notebook demonstrates how to create a **Vulnerability Prioritization and Exposure Management (VPEM)** graph in Neo4j using a combination of infrastructure and threat intelligence data. The VPEM graph helps organizations move beyond simple severity scores (like CVSS) to prioritize vulnerabilities based on their **real-world reachability** and **potential business impact**.
+This notebook demonstrates how to create a **Vulnerability Prioritization and Exposure Management (VPEM)** graph in Neo4j for Cybersecurity applications. Using a combination of infrastructure and threat intelligence data, the VPEM graph helps organizations move beyond simple severity scores (like CVSS) to prioritize vulnerabilities based on their **real-world reachability** and **potential business impact**.
 
 This is a classic use case for cybersecurity teams looking to evolve from reactive "patching everything" to a proactive, risk-based vulnerability management strategy.
 
@@ -13,6 +13,7 @@ This example includes two main notebooks:
    - **Reachability Analysis:** Identifying which vulnerabilities are exposed to the internet.
    - **Impact Analysis:** Determining what critical assets are at risk if a vulnerability is exploited.
    - **Contextual Risk Scoring:** Calculating a dynamic risk score that combines technical severity with business context.
+3. **[Other](other.ipynb):** Additional queries and analyses that can be performed on the VPEM graph.
 
 ### Data Sources
 
