@@ -1,4 +1,4 @@
-name: nvd
+name: cyber-vpem
 channels:
   - conda-forge
   - defaults
