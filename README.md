@@ -2,13 +2,13 @@
 
 ![A Vulnerability Prioritization and Exposure Management (VPEM) Graph Use Case](headline.png)
 
-This notebook demonstrates how to create a **Vulnerability Prioritization and Exposure Management (VPEM)** graph in Neo4j for Cybersecurity applications. Using a combination of infrastructure and threat intelligence data, the VPEM graph helps organizations move beyond simple severity scores (like CVSS) to prioritize vulnerabilities based on their **real-world reachability** and **potential business impact**.
+This repository demonstrates how to create a **Vulnerability Prioritization and Exposure Management (VPEM)** graph in Neo4j for Cybersecurity applications. Using a combination of infrastructure and threat intelligence data, the VPEM graph helps organizations move beyond simple severity scores (like [CVSS](https://www.first.org/cvss/)) to prioritize vulnerabilities based on their **real-world reachability** and **potential business impact**.
 
 This is a classic use case for cybersecurity teams looking to evolve from reactive "patching everything" to a proactive, risk-based vulnerability management strategy.
 
-This example includes two main notebooks:
+This example includes three main notebooks:
 
-1. **[Data Ingestion](loader.ipynb):** Loading synthetic data representing organizational assets, vulnerabilities from NVD, and threat intelligence from CISA KEV into Neo4j.
+1. **[Data Ingestion](loader.ipynb):** Loading synthetic data representing organizational assets, vulnerabilities from [NVD](https://nvd.nist.gov/), and threat intelligence from [CISA KEV](https://www.cisa.gov/known-exploited-vulnerabilities-catalog) into Neo4j.
 2. **[Specific Use Cases](vpem.ipynb):** Demonstrating key VPEM queries, including:
    - **Reachability Analysis:** Identifying which vulnerabilities are exposed to the internet.
    - **Impact Analysis:** Determining what critical assets are at risk if a vulnerability is exploited.
@@ -27,7 +27,7 @@ In our example, we integrate three distinct layers of data to build a holistic r
 
 Traditional vulnerability management relies on flat lists and spreadsheets, which often lead to "alert fatigue" because they treat a critical vulnerability on an isolated internal server the same as one on an internet-facing gateway.
 
-By using Neo4j, we can perform **Attack Path Analysis** to answer critical questions:
+By using Neo4j, we can perform **[Attack Path Analysis](https://github.com/pedroleitao-neo4j/cyber-apa)** to answer critical questions:
 
 * **Reachability:** Is this vulnerable library actually running on a server accessible from the public internet?
 * **Impact:** If this server is compromised, what "Crown Jewel" assets (like PII databases) does its Identity have permission to access?
