@@ -17,6 +17,20 @@ This example includes three main notebooks:
    - **Contextual Risk Scoring:** Calculating a dynamic risk score that combines technical severity with business context.
 3. **[Other](other.ipynb):** Additional queries and analyses that can be performed on the VPEM graph.
 
+### What is VPEM and Why Does It Matter?
+
+Modern organizations face thousands of potential software security flaws (vulnerabilities) across their systems. It is practically impossible for security teams to fix every single issue immediately.
+
+**Vulnerability Prioritization and Exposure Management (VPEM)** is a strategic approach designed to solve the problem of "alert fatigue." Instead of treating every vulnerability with a high generic severity score as an emergency, VPEM uses real-world context to determine what actually poses a risk to your specific business.
+
+It shifts the focus from "What is broken?" to "What could actually hurt us right now?" by considering factors like:
+
+* **Exposure:** Is the vulnerable system accessible from the public internet, or buried deep inside a private network?
+* **Threat Intelligence:** Are hackers actively using this specific flaw in the real world currently?
+* **Asset Criticality:** Is the flaw on a test server that holds no data, or on the main production database?
+
+By connecting these dots, VPEM helps organizations stop wasting time patching theoretical problems and focus their limited resources on the handful of critical issues that could lead to a real breach.
+
 ### Data Sources
 
 In our example, we integrate three distinct layers of data to build a holistic risk view:
