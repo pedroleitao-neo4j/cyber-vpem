@@ -6,6 +6,8 @@ This repository demonstrates how to create a **Vulnerability Prioritization and 
 
 This is a classic use case for cybersecurity teams looking to evolve from reactive "patching everything" to a proactive, risk-based vulnerability management strategy.
 
+![Vulnerability to Compute Instance Reachability](vulnerability-to-compute-graph.png)
+
 This example includes three main notebooks:
 
 1. **[Data Ingestion](loader.ipynb):** Loading synthetic data representing organizational assets, vulnerabilities from [NVD](https://nvd.nist.gov/), and threat intelligence from [CISA KEV](https://www.cisa.gov/known-exploited-vulnerabilities-catalog) into Neo4j.
