@@ -33,7 +33,7 @@ style: |
 ---
 
 # The Problem: Alert Fatigue
-Modern organizations are overwhelmed by thousands of software flaws.
+### Modern organizations are overwhelmed by thousands of software flaws.
 - **The spreadsheet trap:** Treating a critical flaw on an isolated server the same as one on an internet-facing gateway.
 - **Reactive vs Proactive:** Wasting resources on theoretical risks instead of real-world threats.
 - **Lack of Context:** Severity scores (CVSS) don't account for your specific environment.
@@ -41,7 +41,7 @@ Modern organizations are overwhelmed by thousands of software flaws.
 ---
 
 # What is VPEM?
-It shifts the focus from **"What is broken?"** to **"What could actually hurt us right now?"**
+### It shifts the focus from **"What is broken?"** to **"What could actually hurt us right now?"**
 
 - **Exposure:** Is the system public-facing or internal?
 - **Threat Intel:** Is there an active exploit in the wild (CISA KEV)?
@@ -50,7 +50,7 @@ It shifts the focus from **"What is broken?"** to **"What could actually hurt us
 ---
 
 # Core Project Architecture
-The project is structured into three execution layers:
+### The project is structured into three execution layers:
 
 1. **[Data Ingestion](loader.ipynb):** Merging Asset, Vulnerability (NVD), and Threat (CISA KEV) data.
 2. **[Specific Use Cases](vpem.ipynb):** Reachability, Impact, and Contextual Risk scoring.
@@ -59,7 +59,7 @@ The project is structured into three execution layers:
 ---
 
 # Data Integration Layers
-To build a holistic view, three distinct data domains are integrated:
+### To build a holistic view, three distinct data domains are integrated:
 
 | Layer | Sources | Key Entities |
 | :--- | :--- | :--- |
@@ -80,7 +80,7 @@ To build a holistic view, three distinct data domains are integrated:
 ---
 
 # The Resulting Schema
-The graph connects code, infrastructure, and identity in real-time.
+### The graph connects code, infrastructure, and identity in real-time.
 
 ![center w:700px](vpem-schema.png)
 
@@ -89,7 +89,7 @@ The graph connects code, infrastructure, and identity in real-time.
 ---
 
 # The Graph Advantage
-Why use Neo4j for Vulnerability Management?
+### Why use Neo4j for Vulnerability Management?
 
 - **Real-world Reachability:** Is the vulnerable library actually reachable from an `Endpoint`?
 - **Impact Analysis:** If this server is compromised, which "Crown Jewel" assets (PII databases) are at risk via its Identity?
@@ -98,7 +98,7 @@ Why use Neo4j for Vulnerability Management?
 ---
 
 # Outward System Integration
-The VPEM graph acts as a **central nervous system** for security data:
+### The VPEM graph acts as a **central nervous system** for security data:
 
 - **SecOps (SOAR):** Contextual alert enrichment and automated containment.
 - **DevOps (CI/CD):** "Policy as Code" guardrails to fail builds that create lateral movement paths.
