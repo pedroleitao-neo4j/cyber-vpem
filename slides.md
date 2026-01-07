@@ -49,12 +49,14 @@ style: |
 
 ---
 
-# Core Project Architecture
-### The project is structured into three execution layers:
+# Core Architecture
+### The essentials only
 
-1. **[Data Ingestion](loader.ipynb):** Merging Asset, Vulnerability (NVD), and Threat (CISA KEV) data.
-2. **[Specific Use Cases](vpem.ipynb):** Reachability, Impact, and Contextual Risk scoring.
-3. **[Other Analysis](other.ipynb):** Advanced path traversal and security insights.
+1. **Ingest NVD + KEV ([loader.ipynb](loader.ipynb)):** Batch `UNWIND` + `MERGE` from local [cvelistV5](cvelistV5) and enrich with CISA KEV.
+2. **Run VPEM queries ([vpem.ipynb](vpem.ipynb)):** Reachability, Blast Radius, Remediation ROI, Contextual Risk Scoring.
+3. **Explore extras ([other.ipynb](other.ipynb)):** CVE/CWE analyses and risk concentration patterns.
+
+ ### You can **use your own data**, just swap out the synthetic infra with real asset inventory.
 
 ---
 
@@ -63,21 +65,21 @@ style: |
 
 | Layer | Sources | Key Entities |
 | :--- | :--- | :--- |
-| **Organizational Context** | Cloud APIs, IAM, SBOMs | Apps, Compute, S3, IAM Policies |
-| **Vulnerability Intel** | NVD | CVEs, CVSS Scores, Attack Vectors |
-| **Threat Intelligence** | CISA KEV | Active Exploit Status, Deadlines |
+| **Organizational Context** | Synthetic infra in repo | Apps, Build Artifacts, Compute, Endpoints, Identities, IAM Policies, Cloud Services |
+| **Vulnerability Intel** | Local NVD repo ([cvelistV5](cvelistV5)) | CVEs, CVSS, CWEs, Vendors, Products |
+| **Threat Intelligence** | CISA KEV feed | Known-exploited flag, due dates, catalog linkage |
 
 ---
 
-# Visualizing Reachability
-### Vulnerability to Compute Instance Reachability
+# Ingestion Snapshot (NVD + KEV)
+### What we ingest and how
 
-![bg right:55% contain](vulnerability-to-compute-graph.png)
-
-- **Attack Path Analysis:** Identifying the direct path from a CVE to an internet-facing host.
-- **Blast Radius:** Mapping what a compromised identity can access.
+- **NVD CVEs:** Read local JSONs under [cvelistV5/cves](cvelistV5/cves); ingest only PUBLISHED entries; consolidate CNA + ADP metrics; capture CVE/CWE and link CVEs to `Vendor → Product` via `AFFECTS`.
+- **Performance & Idempotency:** Use batched, transactional loads (UNWIND/MERGE semantics) and create uniqueness constraints for `CVE.id`, `CWE.id`, `Vendor.name`, `Product.name`.
+- **KEV Enrichment:** Fetch the official CISA KEV feed; flag CVEs as known exploited; add due/added dates; and link each CVE to a `Catalog` node for traceability.
 
 ---
+
 
 # The Resulting Schema
 ### The graph connects **code, infrastructure, and identity** in real-time.
@@ -94,6 +96,105 @@ style: |
 - **Real-world Reachability:** Is the vulnerable library actually reachable from an `Endpoint`?
 - **Impact Analysis:** If this server is compromised, which "Crown Jewel" assets (PII databases) are at risk via its Identity?
 - **Efficiency:** Find the "Chokepoint"—the one library update that fixes the most reachable risk.
+
+---
+
+# Visualizing Reachability
+### Vulnerability to Compute Instance Reachability
+
+![bg right:55% contain](vulnerability-to-compute-graph.png)
+
+- **Attack Path Analysis:** Identifying the direct path from a CVE to an internet-facing host.
+- **Blast Radius:** Mapping what a compromised identity can access.
+
+---
+
+# Reachability Example (Log4Shell)
+### Is a known CVE exposed to the internet?
+
+```cypher
+MATCH (v:CVE)-[:IDENTIFIED_IN]->(l:Library)
+      -[:DEPENDENCY_OF]->(:BuildArtifact)
+      -[:RUNNING_AS]->(app:Application)
+      -[:HOSTED_ON]->(i:ComputeInstance)
+WHERE v.id = 'CVE-2021-44228' AND EXISTS { (:Endpoint)-[:RESOLVES_TO]->(i) }
+RETURN app.name AS Application, i.public_ip AS Public_IP, v.id AS CVE
+```
+
+Why it matters: filters out non-exploitable findings by requiring an internet-facing `Endpoint` → `ComputeInstance` link.
+
+---
+
+# Impact Example (Blast Radius)
+### What could the compromised app access?
+
+```cypher
+MATCH (v:CVE)-[:IDENTIFIED_IN]->(:Library)
+      -[:DEPENDENCY_OF]->(:BuildArtifact)
+      -[:RUNNING_AS]->(app:Application)
+MATCH (app)-[:AUTHENTICATES_VIA]->(:Identity)
+      -[:ASSUMES]->(:IAMPolicy)
+      -[:HAS_ACCESS_TO]->(cs:CloudService)
+RETURN v.id AS CVE, app.name AS Application, cs.resource_name AS Resource
+```
+
+Connects software risk to cloud data access (e.g., PII bucket exposure).
+
+---
+
+# Remediation ROI Example
+### Which repo fix removes the most exposed risk?
+
+```cypher
+MATCH (v:CVE)-[:IDENTIFIED_IN]->(:Library)
+      -[:DEPENDENCY_OF]->(:BuildArtifact)
+      -[:BUILT_FROM]->(r:Repo)
+MATCH (r)<-[:BUILT_FROM]-(:BuildArtifact)
+      -[:RUNNING_AS]-(:Application)
+      -[:HOSTED_ON]->(i:ComputeInstance)
+WHERE i.public_ip IS NOT NULL
+RETURN r.name AS Repo,
+       COUNT(DISTINCT v) AS Total_Vulns,
+       COUNT(DISTINCT i) AS Exposed_Instances
+ORDER BY Total_Vulns DESC
+```
+
+Targets high-ROI dependency updates at the source (repository ownership).
+
+---
+
+# Contextual Risk Scoring
+### Dynamic score = CVSS × Reachability × Impact
+
+<style scoped>
+pre {
+   font-size: 14px; /* Make code block size smaller */
+   line-height: 1.2em;
+}
+</style>
+
+```cypher
+MATCH (v:CVE)-[:IDENTIFIED_IN]->(:Library)
+      -[:DEPENDENCY_OF]->(:BuildArtifact)
+      -[:RUNNING_AS]->(app:Application)
+      -[:HOSTED_ON]->(ins:ComputeInstance)
+WITH v, app, ins,
+     CASE WHEN ins.public_ip IS NOT NULL THEN 1.5 ELSE 1.0 END AS reach_mult
+OPTIONAL MATCH (ins)-[:RUNS_AS]->(:Identity)
+      -[:ASSUMES]->(:IAMPolicy)
+      -[:HAS_ACCESS_TO]->(:CloudService)
+WITH v, app, reach_mult,
+     CASE WHEN count(*) > 0 THEN 2.0 ELSE 1.0 END AS impact_mult
+RETURN v.id AS CVE,
+       app.name AS Application,
+       v.baseScore AS Base_CVSS,
+       reach_mult AS Reach_Mult,
+       impact_mult AS Impact_Mult,
+       round(v.baseScore * reach_mult * impact_mult, 2) AS Final_Risk
+ORDER BY Final_Risk DESC
+```
+
+Prioritizes internet-exposed paths with sensitive-data access to the top.
 
 ---
 
