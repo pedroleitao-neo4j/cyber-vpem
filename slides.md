@@ -72,7 +72,7 @@ style: |
 # Visualizing Reachability
 ### Vulnerability to Compute Instance Reachability
 
-![bg right:50% contain](vulnerability-to-compute-graph.png)
+![bg right:55% contain](vulnerability-to-compute-graph.png)
 
 - **Attack Path Analysis:** Identifying the direct path from a CVE to an internet-facing host.
 - **Blast Radius:** Mapping what a compromised identity can access.
@@ -82,7 +82,7 @@ style: |
 # The Resulting Schema
 ### The graph connects code, infrastructure, and identity in real-time.
 
-![bg right:50% contain](vpem-schema.png)
+![bg right:55% contain](vpem-schema.png)
 
 *The extended schema captures deployment, usage, and vulnerability identification.*
 
