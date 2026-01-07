@@ -95,7 +95,7 @@ style: |
 
 - **Real-world Reachability:** Is the vulnerable library actually reachable from an `Endpoint`?
 - **Impact Analysis:** If this server is compromised, which "Crown Jewel" assets (PII databases) are at risk via its Identity?
-- **Efficiency:** Find the "Chokepoint"—the one library update that fixes the most reachable risk.
+- **Efficiency:** Find the "Chokepoint" - the one library update that fixes the most reachable risk.
 
 ---
 
