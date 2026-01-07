@@ -80,7 +80,7 @@ style: |
 ---
 
 # The Resulting Schema
-### The graph connects code, infrastructure, and identity in real-time.
+### The graph connects **code, infrastructure, and identity** in real-time.
 
 ![bg right:55% contain](vpem-schema.png)
 
