@@ -57,6 +57,61 @@ With the data loaded, our graph schema will look like the following.
 
 We include nodes for Applications, Libraries, Build Artifacts, Compute Instances, IAM Policies, and CVEs. The relationships capture deployment, usage, and vulnerability identification.
 
+#### The Schema
+
+This Neo4j schema is conceptually aligned with common cybersecurity ontologies (e.g., the [UOC Cyber ontology](https://unifiedcyberontology.org/)) in terms of core entities and relationships. It models Vulnerabilities and Weaknesses, Software/Products and Components, Hosts/Endpoints, Identities/Policies, Data Services, and Threat Intelligence catalogs. The relationship semantics (e.g., affects, identified-in, authenticates-via, resolves-to, assumes, has-access-to) reflect typical attack-path and blast-radius reasoning patterns. While not a 1:1 OWL import, labels and relationships can be straightforwardly mapped to UOC classes/properties; directionality and cardinalities are chosen to support efficient path traversal and prioritization.
+
+Schema outline in Cypher:
+
+```cypher
+// Uniqueness constraints
+CREATE CONSTRAINT cve_id_unique IF NOT EXISTS FOR (c:CVE) REQUIRE c.id IS UNIQUE;
+CREATE CONSTRAINT cwe_id_unique IF NOT EXISTS FOR (w:CWE) REQUIRE w.id IS UNIQUE;
+CREATE CONSTRAINT vendor_name_unique IF NOT EXISTS FOR (v:Vendor) REQUIRE v.name IS UNIQUE;
+CREATE CONSTRAINT product_name_unique IF NOT EXISTS FOR (p:Product) REQUIRE p.name IS UNIQUE;
+
+// Vulnerabilities, weaknesses, vendors, products
+MERGE (v:CVE {id:$cveId})
+MERGE (w:CWE {id:$cweId})
+MERGE (v)-[:HAS_PROBLEM_TYPE]->(w)
+
+MERGE (vend:Vendor {name:$vendor})
+MERGE (prod:Product {name:$product})
+MERGE (vend)-[:PROVIDES]->(prod)
+MERGE (v)-[:AFFECTS]->(prod)
+
+// Supply chain and deployment
+MERGE (lib:Library {name:$library, version:$version})
+MERGE (ba:BuildArtifact {id:$artifactId})
+MERGE (repo:Repo {name:$repo})
+MERGE (app:Application {name:$app})
+MERGE (host:ComputeInstance {id:$instanceId})
+MERGE (end:Endpoint {url:$endpoint})
+
+MERGE (lib)-[:DEPENDENCY_OF]->(ba)
+MERGE (ba)-[:BUILT_FROM]->(repo)
+MERGE (ba)-[:RUNNING_AS]->(app)
+MERGE (app)-[:HOSTED_ON]->(host)
+MERGE (end)-[:RESOLVES_TO]->(host)
+MERGE (v)-[:IDENTIFIED_IN]->(lib)
+
+// Identity, access, and data services
+MERGE (id:Identity {name:$identity})
+MERGE (pol:IAMPolicy {name:$policy})
+MERGE (svc:CloudService {name:$service, resource_name:$resource})
+
+MERGE (app)-[:AUTHENTICATES_VIA]->(id)
+MERGE (host)-[:RUNS_AS]->(id)
+MERGE (id)-[:ASSUMES]->(pol)
+MERGE (pol)-[:HAS_ACCESS_TO]->(svc)
+
+// Threat intelligence catalog and ownership
+MERGE (cat:Catalog {name:'CISA KEV'})
+MERGE (team:Team {name:$team})
+MERGE (v)-[:LISTED_IN]->(cat)
+MERGE (team)-[:MANAGES]->(id)
+```
+
 ## Architecture
 
 ### Overview
