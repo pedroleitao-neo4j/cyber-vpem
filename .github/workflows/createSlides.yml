@@ -1,4 +1,4 @@
-name: Generate Slides (Marp PDF & Pandoc PPTX)
+name: Generate Marp Slides
 on:
   push:
     paths:
@@ -14,27 +14,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Dependencies (Pandoc & Marp)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc
-          npm install -g @marp-team/marp-cli
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      - name: Build Editable PPTX with Pandoc
-        # Pandoc uses '---' to separate slides by default
-        run: |
-          pandoc slides.md -t pptx -o slides.pptx
+      - name: Install Marp CLI
+        run: npm install -g @marp-team/marp-cli
 
-      - name: Build Styled PDF with Marp
+      - name: Build PPTX
+        run: |
+          marp slides.md --pptx --allow-local-files -o slides.pptx
+        env:
+          # This tells Marp exactly where the Chrome binary is located on Ubuntu runners
+          CHROME_PATH: /usr/bin/google-chrome
+
+      - name: Build PDF
         run: |
           marp slides.md --pdf --allow-local-files -o slides.pdf
         env:
           CHROME_PATH: /usr/bin/google-chrome
 
-      - name: Commit and Push
+      - name: Commit and Push PPTX
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add slides.pptx slides.pdf
-          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-generate slides (Pandoc PPTX & Marp PDF)"
+          git add slides.pptx
+          git add slides.pdf
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-generate slides"
           git push
