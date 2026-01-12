@@ -1,4 +1,4 @@
-name: Generate Marp Slides (Editable)
+name: Generate Slides (Marp PDF & Pandoc PPTX)
 on:
   push:
     paths:
@@ -14,27 +14,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      # REQUIRED: Install LibreOffice for editable PPTX conversion
-      - name: Install LibreOffice
+      - name: Install Dependencies (Pandoc & Marp)
         run: |
           sudo apt-get update
-          sudo apt-get install -y libreoffice
+          sudo apt-get install -y pandoc
+          npm install -g @marp-team/marp-cli
 
-      - name: Install Marp CLI
-        run: npm install -g @marp-team/marp-cli
-
-      - name: Build Editable PPTX
+      - name: Build Editable PPTX with Pandoc
+        # Pandoc uses '---' to separate slides by default
         run: |
-          marp slides.md --pptx --pptx-editable --allow-local-files -o slides.pptx
-        env:
-          CHROME_PATH: /usr/bin/google-chrome
+          pandoc slides.md -t pptx -o slides.pptx
 
-      - name: Build PDF
+      - name: Build Styled PDF with Marp
         run: |
           marp slides.md --pdf --allow-local-files -o slides.pdf
         env:
@@ -45,5 +36,5 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add slides.pptx slides.pdf
-          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-generate editable slides"
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-generate slides (Pandoc PPTX & Marp PDF)"
           git push
