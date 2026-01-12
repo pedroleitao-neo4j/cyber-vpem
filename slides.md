@@ -207,5 +207,5 @@ Prioritizes internet-exposed paths with sensitive-data access to the top.
 
 ---
 
-# Questions ?
+# Questions?
 **GitHub:** [pedroleitao-neo4j/cyber-vpem](https://github.com/pedroleitao-neo4j/cyber-vpem)
