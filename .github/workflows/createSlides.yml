@@ -1,4 +1,4 @@
-name: Generate Marp Slides
+name: Generate Marp Slides (Editable)
 on:
   push:
     paths:
@@ -19,14 +19,19 @@ jobs:
         with:
           node-version: '20'
 
+      # REQUIRED: Install LibreOffice for editable PPTX conversion
+      - name: Install LibreOffice
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libreoffice
+
       - name: Install Marp CLI
         run: npm install -g @marp-team/marp-cli
 
-      - name: Build PPTX
+      - name: Build Editable PPTX
         run: |
-          marp slides.md --pptx --allow-local-files -o slides.pptx
+          marp slides.md --pptx --pptx-editable --allow-local-files -o slides.pptx
         env:
-          # This tells Marp exactly where the Chrome binary is located on Ubuntu runners
           CHROME_PATH: /usr/bin/google-chrome
 
       - name: Build PDF
@@ -35,11 +40,10 @@ jobs:
         env:
           CHROME_PATH: /usr/bin/google-chrome
 
-      - name: Commit and Push PPTX
+      - name: Commit and Push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add slides.pptx
-          git add slides.pdf
-          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-generate slides"
+          git add slides.pptx slides.pdf
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-generate editable slides"
           git push
