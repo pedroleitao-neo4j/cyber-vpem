@@ -61,6 +61,23 @@ We include nodes for Applications, Libraries, Build Artifacts, Compute Instances
 
 This Neo4j schema is conceptually aligned with common cybersecurity ontologies (e.g., the [UOC Cyber ontology](https://unifiedcyberontology.org/)) in terms of core entities and relationships. It models Vulnerabilities and Weaknesses, Software/Products and Components, Hosts/Endpoints, Identities/Policies, Data Services, and Threat Intelligence catalogs. The relationship semantics (e.g., affects, identified-in, authenticates-via, resolves-to, assumes, has-access-to) reflect typical attack-path and blast-radius reasoning patterns. While not a 1:1 OWL import, labels and relationships can be straightforwardly mapped to UOC classes/properties; directionality and cardinalities are chosen to support efficient path traversal and prioritization.
 
+Node labels and properties (as created in `loader.ipynb`):
+- CVE: id (unique), state, assigner, publishedDate, lastModifiedDate, source, description, baseScore, baseSeverity, attackComplexity, attackVector, availabilityImpact, confidentialityImpact, integrityImpact, privilegesRequired, userInteraction, kev_addedDate, kev_dueDate, kev_reason, isKnownExploited
+- CWE: id (unique)
+- Vendor: name (unique)
+- Product: name (unique)
+- Library: name, version, language
+- BuildArtifact: id, registry
+- Repo: name, criticality
+- Application: name, tier
+- ComputeInstance: id, name, public_ip
+- Endpoint: url
+- Identity: name, arn
+- IAMPolicy: name
+- CloudService: name, resource_name
+- Team: name
+- Catalog: name, lastUpdated, version
+
 Schema outline in Cypher:
 
 ```cypher
@@ -72,6 +89,27 @@ CREATE CONSTRAINT product_name_unique IF NOT EXISTS FOR (p:Product) REQUIRE p.na
 
 // Vulnerabilities, weaknesses, vendors, products
 MERGE (v:CVE {id:$cveId})
+SET v += {
+   state:$state,
+   assigner:$assigner,
+   publishedDate:$publishedDate,
+   lastModifiedDate:$lastModifiedDate,
+   source:$source,
+   description:$description,
+   baseScore:$baseScore,
+   baseSeverity:$baseSeverity,
+   attackComplexity:$attackComplexity,
+   attackVector:$attackVector,
+   availabilityImpact:$availabilityImpact,
+   confidentialityImpact:$confidentialityImpact,
+   integrityImpact:$integrityImpact,
+   privilegesRequired:$privilegesRequired,
+   userInteraction:$userInteraction,
+   kev_addedDate:$kev_addedDate,
+   kev_dueDate:$kev_dueDate,
+   kev_reason:$kev_reason,
+   isKnownExploited:$isKnownExploited
+}
 MERGE (w:CWE {id:$cweId})
 MERGE (v)-[:HAS_PROBLEM_TYPE]->(w)
 
@@ -82,10 +120,15 @@ MERGE (v)-[:AFFECTS]->(prod)
 
 // Supply chain and deployment
 MERGE (lib:Library {name:$library, version:$version})
+SET lib.language = $language
 MERGE (ba:BuildArtifact {id:$artifactId})
+SET ba.registry = $registry
 MERGE (repo:Repo {name:$repo})
+SET repo.criticality = $criticality
 MERGE (app:Application {name:$app})
+SET app.tier = $tier
 MERGE (host:ComputeInstance {id:$instanceId})
+SET host += {name:$instanceName, public_ip:$publicIp}
 MERGE (end:Endpoint {url:$endpoint})
 
 MERGE (lib)-[:DEPENDENCY_OF]->(ba)
@@ -97,6 +140,7 @@ MERGE (v)-[:IDENTIFIED_IN]->(lib)
 
 // Identity, access, and data services
 MERGE (id:Identity {name:$identity})
+SET id.arn = $identityArn
 MERGE (pol:IAMPolicy {name:$policy})
 MERGE (svc:CloudService {name:$service, resource_name:$resource})
 
@@ -107,6 +151,7 @@ MERGE (pol)-[:HAS_ACCESS_TO]->(svc)
 
 // Threat intelligence catalog and ownership
 MERGE (cat:Catalog {name:'CISA KEV'})
+SET cat += {lastUpdated:$kevLastUpdated, version:$kevVersion}
 MERGE (team:Team {name:$team})
 MERGE (v)-[:LISTED_IN]->(cat)
 MERGE (team)-[:MANAGES]->(id)
